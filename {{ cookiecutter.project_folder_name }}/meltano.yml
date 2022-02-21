@@ -1,0 +1,36 @@
+version: 1
+plugins:
+  extractors:
+  - name: tap-example # TODO add a real tap's configuration here https://docs.meltano.com/guide/plugin-management#adding-a-plugin-to-your-project
+{%- if cookiecutter.add_target == "Snowflake" %}
+    # Load into the example schema in Snowflake TODO edit as needed
+{%- elif cookiecutter.add_target == "BigQuery" %}
+    # Load into the example dataset in BigQuery TODO edit as needed
+{%- endif %}
+    load_schema: example
+  loaders:
+  # target-jsonl is used for testing, files are stored in the output directory
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+{%- if cookiecutter.add_target == "Snowflake" %}
+  - name: target-snowflake
+    variant: transferwise
+    pip_url: pipelinewise-target-snowflake
+    config:
+      # dbname and file_format are overridden using environment variables in production
+      # TODO create required Snowflake objects per https://github.com/transferwise/pipelinewise-target-snowflake#pre-requirements
+      dbname: meltano_dev
+      file_format: meltano_dev.public.csv
+      add_metadata_columns: true
+{%- elif cookiecutter.add_target == "BigQuery" %}
+  - name: target-bigquery
+    variant: adswerve
+    pip_url: git+https://github.com/adswerve/target-bigquery.git
+    config:
+      # project_id is overridden using an environment variable in production
+      # TODO configure BigQuery per https://github.com/adswerve/target-bigquery#how-to-use-it
+      project_id: # TODO add the GCP project ID to use for local testing here
+      dataset_id: $MELTANO_EXTRACT__LOAD_SCHEMA
+      add_metadata_columns: true
+{%- endif %}

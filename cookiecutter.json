@@ -1,0 +1,9 @@
+{
+    "org_name": "Correctly capitalized organization name",
+    "project_folder_name": "meltano-on-github-actions",
+    "add_target": [
+        "No",
+        "Snowflake",
+        "BigQuery"
+    ]
+}
