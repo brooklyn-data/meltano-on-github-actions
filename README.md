@@ -23,7 +23,6 @@ For a list of pre-made Singer taps and targets, see the [Meltano Hub](https://hu
 ## Usage prerequisites:
 - Python >= 3.7
 - pipx
-- poetry
 - meltano
 - cookiecutter
 
@@ -31,11 +30,6 @@ Install pipx with:
 ```bash
 pip install pipx
 pipx ensurepath
-```
-
-Install Poetry with:
-```bash
-pipx install poetry
 ```
 
 Install Meltano with:
