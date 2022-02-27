@@ -1,6 +1,6 @@
 # {{ cookiecutter.org_name }}'s Meltano project
 
-This project has been generated using [Brooklyn Data Co](https://brooklyndata.co/)'s [Meltano on GitHub Actions template](https://github.com/brooklyn-data/meltano-on-github-actions).
+This project has been generated using [Brooklyn Data Co.](https://brooklyndata.co/)'s [Meltano on GitHub Actions template](https://github.com/brooklyn-data/meltano-on-github-actions).
 
 ## What's Meltano?
 

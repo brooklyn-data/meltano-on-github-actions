@@ -62,5 +62,5 @@ Slack alerts on failure are enabled [using the official Slack GitHub action](htt
 5. Invite the bot user into the channel you wish to post messages to (/invite @bot_user_name).
 6. Copy the Slack channel's Channel ID (from the channel's About section, accessed by clicking the drop down arrow next to the channel's name) into another repository secret named `SLACK_CHANNEL_ID`.
 
-# About Brooklyn Data Co
-We are a full-stack data team and analytics team as a service, focused on leadership, process improvement, implementation, and advanced analytics. [Read more about what we do](https://brooklyndata.co/solution) and [join us!](https://brooklyndata.co/careers)
+# About Brooklyn Data Co.
+We are a full-stack data and analytics team, focused on leadership, process improvement, implementation, and advanced analytics. [Read more about what we do](https://brooklyndata.co) and [check out our open roles!](https://brooklyndata.co/careers)
