@@ -1,0 +1,70 @@
+{%- raw %}
+on:
+  schedule:
+    - cron: '0 8 * * *' # Every day at 8AM UTC - TODO update as needed
+  workflow_dispatch: # workflow_dispatch enables the workflow to be triggered manually
+
+jobs:
+  meltano:
+    runs-on: ubuntu-latest
+    name: Meltano
+    steps:
+      # Checkout the repository so that a path to the action.yml can be used
+      - uses: actions/checkout@v2
+{% endraw %}{%- if cookiecutter.add_target == "BigQuery" %}{% raw %}
+      # Authenticate to Google SDK for target-bigquery
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.5.1
+        with:
+          # TODO add GCP_PROJECT_ID and GCP_SA_KEY as GitHub Secrets
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+{% endraw %}{%- endif %}{% raw %}
+      # Get the database files from the previous run, if exists
+      - name: Download latest SQLite database artifact
+        uses: dawidd6/action-download-artifact@v2
+        continue-on-error: true
+        with:
+          workflow: ${{ github.workflow }}
+          branch: main
+          name: meltano.db
+          path: ${{ github.workspace }}
+          workflow_conclusion: completed # Download artifacts from the latest completed run, even if it failed. This enables Meltano to start off from where a tap failed.
+      - name: Meltano
+        if: always() # Always run this step even if the prior failed due to no artifact found (this should only take effect if first time running)
+        uses: ./
+        env:
+          # TODO add and modify as needed and add to the repo's secrets
+{% endraw %}{%- if cookiecutter.add_target == "Snowflake" %}{% raw %}
+          TARGET_SNOWFLAKE_ACCOUNT: ${{ secrets.TARGET_SNOWFLAKE_ACCOUNT }}
+          TARGET_SNOWFLAKE_USERNAME: MELTANO
+          TARGET_SNOWFLAKE_PASSWORD: ${{ secrets.TARGET_SNOWFLAKE_PASSWORD }}
+          TARGET_SNOWFLAKE_DBNAME: MELTANO
+          TARGET_SNOWFLAKE_WAREHOUSE: MELTANO
+          TARGET_SNOWFLAKE_FILE_FORMAT: meltano.public.csv
+{% endraw %}{%- elif cookiecutter.add_target == "BigQuery" %}{% raw %}
+          TARGET_BIGQUERY_PROJECT_ID: # TODO add the production BigQuery project ID here
+{% endraw %}{%- endif %}{% raw %}
+          MELTANO_DATABASE_URI: sqlite:////github/workspace/meltano.db
+        with:
+          # TODO set correct tap and target names
+          args: meltano elt tap-example {% endraw %}{% if cookiecutter.add_target == "Snowflake" %}target-snowflake{% elif cookiecutter.add_target == "BigQuery" %}target-bigquery{% else %}target-example{% endif %}{% raw %} --job_id=meltano # job_id required to use incremental state, can be anything
+      - name: Meltano Slack alert
+        # TODO configure SLACK_CHANNEL_ID and SLACK_BOT_TOKEN secrets in the repo
+        if: failure() # Only run if one of the previous steps fails
+        id: slack
+        uses: slackapi/slack-github-action@v1.16.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|:warning: Workflow ${{ github.workflow }} has failed.>"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      # Upload the sqlite database containing incremental, bookmark state
+      - name: Upload SQLite database artifact
+        if: always() # Always run this step even if the prior failed
+        uses: actions/upload-artifact@v2
+        with:
+          name: meltano.db
+          path: ${{ github.workspace }}/meltano.db*
+{%- endraw %}

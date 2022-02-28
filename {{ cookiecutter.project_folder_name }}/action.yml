@@ -1,0 +1,5 @@
+name: 'Run Meltano'
+description: 'Runs a Meltano command in the Docker image'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
